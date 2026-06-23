@@ -52,7 +52,7 @@ app.post('/api/webhook', async (req, res) => {
 
 
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8000;
 
 // Initialize the server and connect to the database
 const server = app.listen(PORT, async () => {

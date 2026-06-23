@@ -6,24 +6,27 @@ class WebhookProcessorServiceClass {
     process = async (body: any): Promise<{ validated: boolean }> => {
         const { event, jid } = body;
 
-        const validate_url = process.env.VELVET_WEBHOOK_VALIDATE_URL!;
+        const raw_urls = process.env.VELVET_WEBHOOK_VALIDATE_URL!;
+        const validate_urls = raw_urls.split(",").map(u => u.trim()).filter(Boolean);
         const velvet_api_key = process.env.VELVET_API_KEY;
 
         const headers: Record<string, string> = { "content-type": "application/json" };
         if (velvet_api_key) headers["x-api-key"] = velvet_api_key;
 
-        // Step 1: Validate jid with Velvet — returns return_url on success
-        const validate_res = await axios.post(validate_url, { jid, event }, {
-            headers,
-            timeout: 5000,
-        });
-
-        if (!validate_res.data?.success) {
+        // Step 1: Validate jid with Velvet — fire all URLs in parallel, take first success
+        let return_url: string;
+        try {
+            return_url = await Promise.any(
+                validate_urls.map(async (url) => {
+                    const res = await axios.post(url, { jid, event }, { headers, timeout: 5000 });
+                    if (!res.data?.success) throw new Error("not validated");
+                    return res.data.return_url as string;
+                })
+            );
+        } catch {
             console.warn(`Webhook validation failed for jid=${jid}, event=${event}`);
             return { validated: false };
-        }
-
-        const return_url: string = validate_res.data.return_url;
+        } 
 
         // Step 2: Transform Blostem payload into { status, update_data }
         const { status, update_data } = webhook_controller.process_event(body);
