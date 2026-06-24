@@ -32,9 +32,9 @@ velvetRouter.get("/customer-details", async (req: Request, res: Response) => {
             return res.status(400).json({ error: "mobile query param is required" });
         }
 
-        const raw_urls = process.env.VELVET_WEBHOOK_VALIDATE_URL!;
+        const raw_urls = process.env.CUSTOMER_DATA_URL!;
         if (!raw_urls) {
-            return res.status(500).json({ error: "VELVET_WEBHOOK_VALIDATE_URL is not configured" });
+            return res.status(500).json({ error: "CUSTOMER_DATA_URL is not configured" });
         }
 
         const validate_urls = raw_urls.split(",").map(u => u.trim()).filter(Boolean);
