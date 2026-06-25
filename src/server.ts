@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/error.middleware.js";
 import { verifyApiKey } from "./middleware/auth.js";
 import { velvetRouter } from "./routes/velvet.routes.js";
 import { webhook_processor_service } from "./services/webhook-processor.service.js";
+import { contact_router } from "./routes/customer.router.js";
 
 // Load environment variables from the configuration file
 dotenv.config();
@@ -39,6 +40,7 @@ app.use(errorHandler);
 
 
 app.use('/api/velvet', verifyApiKey, velvetRouter);
+app.use('/api/customer-details', contact_router);
 app.post('/api/webhook', async (req, res) => {
     try {
         const result = await webhook_processor_service.process(req.body);
