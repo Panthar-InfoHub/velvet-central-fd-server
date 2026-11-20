@@ -40,7 +40,7 @@ class BlostemServiceClass {
 
     get_redirect_token = async (): Promise<string> => {
         const res = await axios.post(
-            `${process.env.BLOSTEM_MASTER_URL}/auth/v1/partner/login`,
+            `${process.env.BLOSTEM_AUTH_URL}/partner/login`,
             {
                 email: process.env.BLOSTEM_USERNAME,
                 password: process.env.BLOSTEM_DASH_PASSWORD,
