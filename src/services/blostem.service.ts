@@ -40,16 +40,20 @@ class BlostemServiceClass {
     }
 
     get_redirect_token = async (): Promise<string> => {
-        const res = await axios.post(
-            `${process.env.BLOSTEM_AUTH_URL}/partner/login`,
-            {
-                email: process.env.BLOSTEM_USERNAME,
-                password: process.env.BLOSTEM_DASH_PASSWORD,
-            }
-        );
+        try {
+            const res = await axios.post(
+                `${process.env.BLOSTEM_AUTH_URL}/partner/login`,
+                {
+                    email: process.env.BLOSTEM_USERNAME,
+                    password: process.env.BLOSTEM_DASH_PASSWORD,
+                }
+            );
 
-        logger.debug(`Redirect token response --> `, res)
-        return res.data.data.access.token;
+            logger.debug(`Redirect token response --> `, res)
+            return res.data.data.access.token;
+        } catch (error: any) {
+            logger.error("Error while generating redirect token: ", error)
+        }
     }
 
     create_redirect_url = async ({ jid, event, user_phone }: {
