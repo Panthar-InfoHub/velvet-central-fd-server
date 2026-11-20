@@ -16,7 +16,13 @@ addColors(customColors);
 const customFormat = printf(({ timestamp, level, message, ...meta }) => {
     const splatArgs: any = meta[Symbol.for('splat')] || [];
     const splatString = splatArgs.length ? splatArgs.map((arg: any) => {
-        if (typeof arg === 'object') return JSON.stringify(arg, null, 2);
+        if (typeof arg === 'object') {
+            try {
+                return JSON.stringify(arg, null, 2);
+            } catch {
+                return arg?.message || String(arg);
+            }
+        }
         return String(arg);
     }).join(' ') : '';
     return `${timestamp} [${level}]: ${message} ${splatString}\n`;

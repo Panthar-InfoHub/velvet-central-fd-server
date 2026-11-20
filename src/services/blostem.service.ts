@@ -41,18 +41,20 @@ class BlostemServiceClass {
 
     get_redirect_token = async (): Promise<string> => {
         try {
+            const authBaseUrl = process.env.BLOSTEM_AUTH_URL || "https://binvestt-api.blostem.com";
             const res = await axios.post(
-                `${process.env.BLOSTEM_AUTH_URL}/partner/login`,
+                `${authBaseUrl}/partner/login`,
                 {
                     email: process.env.BLOSTEM_USERNAME,
                     password: process.env.BLOSTEM_DASH_PASSWORD,
                 }
             );
 
-            logger.debug(`Redirect token response --> `, res)
+            logger.debug(`Redirect token response --> `, res.data);
             return res.data.data.access.token;
         } catch (error: any) {
-            logger.error("Error while generating redirect token: ", error)
+            logger.error("Error while generating redirect token: ", error.response?.data || error.message);
+            throw error;
         }
     }
 
@@ -77,10 +79,11 @@ class BlostemServiceClass {
                 }
             );
 
-            logger.debug(`Redirect url response by blostem --> `, response)
+            logger.debug(`Redirect url response by blostem --> `, response.data);
             return response.data;
         } catch (error: any) {
-            logger.error("Error while generating redirect url: ", error)
+            logger.error("Error while generating redirect url: ", error.response?.data || error.message);
+            throw error;
         }
     }
 }
