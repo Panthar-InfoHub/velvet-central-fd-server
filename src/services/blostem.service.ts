@@ -1,5 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
+import logger from "../middleware/logger.js";
 
 class BlostemServiceClass {
 
@@ -46,6 +47,8 @@ class BlostemServiceClass {
                 password: process.env.BLOSTEM_DASH_PASSWORD,
             }
         );
+
+        logger.debug(`Redirect token response --> `, res)
         return res.data.data.access.token;
     }
 
@@ -54,22 +57,27 @@ class BlostemServiceClass {
         event: string;
         user_phone: string;
     }) => {
-        const token = await this.get_redirect_token();
-        const encrypted_phone = this.create_encryption_text(user_phone);
+        try {
+            const token = await this.get_redirect_token();
+            const encrypted_phone = this.create_encryption_text(user_phone);
 
+            const response = await axios.post(
+                `${process.env.BLOSTEM_MASTER_URL}/core/v1/asset/web/redirect`,
+                { tk: encrypted_phone, jid, event, token },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Cookie: `token=${token}`,
+                    },
+                    timeout: 10000,
+                }
+            );
 
-        const response = await axios.post(
-            `${process.env.BLOSTEM_MASTER_URL}/core/v1/asset/web/redirect`,
-            { tk: encrypted_phone, jid, event, token },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Cookie: `token=${token}`,
-                },
-                timeout: 10000,
-            }
-        );
-        return response.data;
+            logger.debug(`Redirect url response by blostem --> `, response)
+            return response.data;
+        } catch (error: any) {
+            logger.error("Error while generating redirect url: ", error)
+        }
     }
 }
 
